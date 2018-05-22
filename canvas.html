@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+      <style>
+          #myCanvas {
+              margin: 30px;
+              border: solid;
+          }
+    </style>
+  </head>
+  <body>
+      <form>
+      <fieldset>
+        <legend>Paramètres de recherche :</legend>
+          <label></label>   
+      
+          <button>Lancer la recherche</button>
+       </fieldset>
+      </form>
+        <fieldset>
+        <legend>Résultat de la recherche :</legend>
+          <span>Hello world!!</span>   
+       </fieldset>
+    <canvas id="myCanvas" width="274" height="184"></canvas>
+  </body>
+    <!-- <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> -->
+    <script>
+        // Phrase
+        var sentence = "Helloworldbonjourlemonde";
+        // Tranformer un nombre décimal en binaire
+        function decbin(decimal) {
+            res = []; // Contient le résultat
+            while (decimal){
+                res.push(decimal % 2);
+                decimal = Math.floor(decimal / 2);
+            }
+            //res.reverse(); // On remet dans le bon ordre
+            return res;
+            //alert(res.join(''));
+        }
+        // Transformer chaine de caractères en binaire
+        function charbin(theString) {
+            res = [];
+            for (var i=0; i<theString.length; i++) {
+                res = res + decbin(theString.charCodeAt(i)) + ',';
+            }
+            return res;
+        }
+        // Transformer binaire en décimal
+        function bindec(binaire) {
+            var result = 0;
+            for (var i=0; i < binaire.length; i++) {
+                   result = result + Math.pow(2, i)*binaire[i];
+            }
+            return result;
+        }
+        
+        console.log(charbin(sentence));
+        
+        //console.log(charbin(sentence)[6]);
+        //console.log(charbin(sentence)[7]);
+        //console.log(charbin(sentence)[8]);
+        //console.log(charbin(sentence)[9]);
+        
+        var img = new Image();
+        img.src = 'index.jpg';
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext('2d');
+        img.onload = function() {
+            ctx.drawImage(img, 0, 0);
+            img.style.display = 'none';
+            // Cryptage message
+            //console.log(img.height);
+            //console.log(img.width);
+            // k utilisé pour boucler sur les bits de la phrase
+            k = 0;
+            // Boucle sur les lignes de pixels
+            for(i=0;i<img.height;i++) {
+                // Boucle sur les colonnes de pixels
+                for(j=0;j<img.width;j++) {
+                    if (k<(sentence.length*7)) {
+                        var pixel = ctx.getImageData(j, i, 1, 1);
+                        var dataImg = pixel.data;
+                        //console.log(dataImg[0]);
+                        var test = decbin(dataImg[0]);
+                        // Modification du bit de poids le plus faible
+                        //test[0]=parseInt((charbin(sentence))[2*k]);
+                        test[0]=255;
+                        // Modification de la couleur bleue
+                        dataImg[0]=bindec(test);
+                        // Passage en binaire
+                        //console.log(dataImg);
+                        k = k + 1;
+                        ctx.putImageData(pixel,j,i);
+                    }
+            }
+         }
+            
+            // Décryptage message
+            nombreBin = [];
+            var k = 0;
+            for(i=0;i<img.height;i++) {
+                // Boucle sur les colonnes de pixels
+                for(j=0;j<img.width;j++) {
+                    if (k<(sentence.length*7)) {
+                        var pixel = ctx.getImageData(j, i, 1, 1);
+                        var dataImg = pixel.data;
+                        //console.log(dataImg[0]);
+                        var test = decbin(dataImg[0]);
+                        // Modification du bit de poids le plus faible
+                        nombreBin[k] = test[0];
+                        k = k + 1;
+                        console.log(dataImg[0]);
+                        console.log(nombreBin);
+                    }
+            }
+         }
+            var phrase = "";
+            //console.log(nombreBin);
+            for(i=0;i<nombreBin.length;i++) {
+                j=0;
+                carac = [];
+                while (j<7) {
+                       carac[j]=nombreBin[i];
+                       j = j + 1;
+                       i = i + 1;
+                       }
+                i = i - 1;
+                console.log(bindec(carac));
+                phrase = phrase + String.fromCharCode(bindec(carac));
+            }
+            console.log(phrase);
+            
+            
+        };
+
+        /*
+            function pick(event) {
+              var x = event.layerX;
+              var y = event.layerY;
+              var pixel = ctx.getImageData(x, y, 1, 1);
+              var dataImg = pixel.data;
+              console.log('x = ' + x + ' y = ' + y);
+              console.log(dataImg);
+            }
+            c.addEventListener('mousemove', pick);
+            */
+       
+        
+    </script>
+</html>
